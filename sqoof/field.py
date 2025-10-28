@@ -37,6 +37,12 @@ class Field(sqlalchemy.Column):
 		if create_only and update_only:
 			raise ValueError("Only one of `create_only` or `update_only` can be true.")
 
+		if self.creatable and not writable:
+			raise ValueError("Creatable fields must be writable.")
+
+		if self.updatable and not writable:
+			raise ValueError("Updatable fields must be writable.")
+
 		if primary_key and self.updatable:
 			raise ValueError("Primary keys cannot be updatable.")
 

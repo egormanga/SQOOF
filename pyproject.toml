@@ -1,6 +1,6 @@
 [project]
 name = 'sqoof'
-version = '0.1.0'
+version = '0.1.1'
 description = "Structured Querying in Object Oriented Fashion"
 authors = [
 	{name="Egor Vorontsov", email='sdoregor@sdore.me'},
