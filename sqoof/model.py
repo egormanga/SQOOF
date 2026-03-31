@@ -45,31 +45,21 @@ class ModelMeta(sqlalchemy.orm.decl_api.DeclarativeAttributeIntercept, graphene.
 			})() for k, v in fields.items() if v.readable and (t := (v._type if not isinstance(v, String) else graphene.types.String))},
 		)
 
-		if any(i.readable for i in fields.values()):
-			classdict['Type'] = type(
-				name,
-				(graphene.ObjectType,),
-				{
-					'__doc__': (classdict['__doc__'].strip() if classdict.get('__doc__') else None),
-					**{k: (v if not isinstance(v, String) else graphene.types.String(*v.args)) for k, v in fields.items() if v.readable},
-				},
-			)
-
-		if any(i.readable for i in fields.values()):
-			classdict['Read'] = type(
-				f"Read{name}Input",
-				(graphene.InputObjectType,),
-				{
-					'__doc__': (classdict['__doc__'].strip() if classdict.get('__doc__') else None),
-				},
-			)
+		classdict['Type'] = type(
+			name,
+			(graphene.ObjectType,),
+			{
+				'__doc__': (doc := (classdict['__doc__'].strip() if classdict.get('__doc__') else None)),
+				**{k: (v if not isinstance(v, String) else graphene.types.String(*v.args)) for k, v in fields.items() if v.readable},
+			},
+		)
 
 		if any(i.creatable for i in fields.values()):
 			classdict['Create'] = type(
 				f"Create{name}Input",
 				(graphene.InputObjectType,),
 				{
-					'__doc__': (classdict['__doc__'].strip() if classdict.get('__doc__') else None),
+					'__doc__': doc,
 					**{k: (v if not isinstance(v, String) else graphene.types.String(*v.args)) for k, v in fields.items() if v.creatable},
 				},
 			)
@@ -79,7 +69,7 @@ class ModelMeta(sqlalchemy.orm.decl_api.DeclarativeAttributeIntercept, graphene.
 				f"Update{name}Input",
 				(graphene.InputObjectType,),
 				{
-					'__doc__': (classdict['__doc__'].strip() if classdict.get('__doc__') else None),
+					'__doc__': doc,
 					**{k: (v._type if not isinstance(v, String) else graphene.types.String)(*v.args) for k, v in fields.items() if v.updatable},
 				},
 			)
@@ -128,19 +118,27 @@ class Model(metaclass=ModelMeta):
 		return {k: (type_coerce(v.value, None) if isinstance(v, enum.Enum) else cls._resolve_enums(v) if isinstance(v, dict) else v) for k, v in d.items()}
 
 	@classmethod
+	def _parse_selection(cls, nodes) -> dict:
+		return {i.name.value: (cls._parse_selection(i.selection_set.selections) if i.selection_set is not None else {}) for i in nodes}
+
+	@classmethod
 	async def resolve(cls, context, info, *, id):
 		query = select(cls).where(cls.id == id)
+
+		if fields := cls._parse_selection(info.field_nodes):
+			query = query.options(sqlalchemy.orm.load_only(*(getattr(cls, i) for i in fields[info.field_name])))
 
 		async with info.context['request'].state.db.connect() as conn:
 			return (await conn.execute(query)).fetchone()
 
 	@classmethod
 	async def resolve_list(cls, context, info, *, filters: Filters = None):
-		filters = (cls._resolve_enums(filters) if filters is not None else {})
-
 		query = select(cls)
 
-		if filters:
+		if fields := cls._parse_selection(info.field_nodes):
+			query = query.options(sqlalchemy.orm.load_only(*(getattr(cls, i) for i in fields[info.field_name])))
+
+		if filters := (cls._resolve_enums(filters) if filters is not None else {}):
 			query = query.where(*cls._compile_filters(filters))
 
 		async with info.context['request'].state.db.connect() as conn:
@@ -210,5 +208,5 @@ class Model(metaclass=ModelMeta):
 			await conn.execute(query) # TODO: return
 
 
-# by Sdore, 2023-25
+# by Sdore, 2023-26
 #   www.sdore.me

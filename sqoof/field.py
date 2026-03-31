@@ -52,17 +52,15 @@ class Field:
 
 		if sqltype := getattr(self, '_sqltype', None):
 			if sqltype is sqlalchemy.dialects.postgresql.types.BYTEA:
-				sqltype = sqltype(*args, length=kwargs.pop('length', None))
-			else: sqltype = sqltype(*args)
+				args = (sqltype(*args, length=kwargs.pop('length', None)),)
+			else: args = (sqltype(*args),)
 
 			kwargs.pop('type_', None)
 		elif sqltype := kwargs.pop('type_', None):
-			sqltype = sqltype.__class__(*args)
-		else:
-			sqltype = None
+			args = (sqltype.__class__(*args),)
 
 		self.args = ()
-		super().__init__(sqltype, primary_key=primary_key, nullable=(not required), **kwargs)
+		super().__init__(*args, *kwargs.pop('args', ()), primary_key=primary_key, nullable=(not required), **kwargs)
 
 	@property
 	def kwargs(self) -> dict:
