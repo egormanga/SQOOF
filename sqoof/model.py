@@ -208,3 +208,7 @@ class Model(metaclass=ModelMeta):
 
 		async with info.context['request'].state.db.begin() as conn:
 			await conn.execute(query) # TODO: return
+
+
+# by Sdore, 2023-25
+#   www.sdore.me

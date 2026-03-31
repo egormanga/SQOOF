@@ -14,7 +14,10 @@ for k, v in globals().copy().items():  # monkey patching
 import graphene.types
 import sqlalchemy.types
 
-from . import Field as _Field
+from .field import (
+	ColumnField as _Field,
+	EnumField as Enum,
+)
 
 
 globals().update({
@@ -36,3 +39,7 @@ globals().update({
 		sqlalchemy.types.Uuid: graphene.types.UUID,
 	}.items()
 })
+
+
+# by Sdore, 2023-26
+#   www.sdore.me

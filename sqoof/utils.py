@@ -23,3 +23,7 @@ class classproperty:
 
 	def __get__(self, obj, cls):
 		return self.__wrapped__(cls)
+
+
+# by Sdore, 2023-25
+#   www.sdore.me

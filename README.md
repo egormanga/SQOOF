@@ -1,4 +1,4 @@
-# Structured Querying in Object Oriented Fashion
+# Structured Querying in Object-Oriented Fashion
 ###### (p.k.a. GQLAlchemy _(not [that one](https://github.com/memgraph/gqlalchemy))_ or The Magic™)
 
 ## Example:

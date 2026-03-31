@@ -1,8 +1,9 @@
+import graphene
 import sqlalchemy
 from graphene.types.unmountedtype import UnmountedType
 
 
-class Field(sqlalchemy.Column):
+class Field:
 	readable: bool
 	writable: bool
 	required: bool
@@ -74,3 +75,11 @@ class Field(sqlalchemy.Column):
 	@property
 	def updatable(self) -> bool:
 		return (self.writable and not self.create_only)
+
+class ColumnField(Field, sqlalchemy.Column): pass
+
+class EnumField(ColumnField, graphene.Enum): pass
+
+
+# by Sdore, 2025-26
+#   www.sdore.me

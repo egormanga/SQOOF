@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Structured Querying in Object Oriented Fashion
+# Structured Querying in Object-Oriented Fashion
 
 import graphene
 

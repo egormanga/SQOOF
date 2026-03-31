@@ -1,7 +1,7 @@
 [project]
 name = 'sqoof'
-version = '0.1.1'
-description = "Structured Querying in Object Oriented Fashion"
+version = '0.2.0'
+description = "Structured Querying in Object-Oriented Fashion"
 authors = [
 	{name="Egor Vorontsov", email='sdoregor@sdore.me'},
 	{name="Alexander Chechenev", email='alexandeer038@gmail.com'},
@@ -11,9 +11,9 @@ readme = 'README.md'
 requires-python = '~=3.13'
 dependencies = [
     'graphene ~= 3.4',
-    'sqlalchemy ~= 2',
+    'sqlalchemy ~= 2.0',
 ]
 
 [build-system]
-requires = ['poetry-core >= 2.0.0, < 3.0.0']
+requires = ['poetry-core >= 2, <3']
 build-backend = 'poetry.core.masonry.api'
