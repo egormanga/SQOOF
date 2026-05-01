@@ -1,5 +1,5 @@
 import graphene
-import sqlalchemy
+import sqlalchemy.orm
 from graphene.types.unmountedtype import UnmountedType
 
 
@@ -26,6 +26,7 @@ class Field:
 		**kwargs
 	):
 		if primary_key: required = True
+		if kwargs.pop('nullable', None): required = True
 
 		self.readable = readable
 		self.writable = writable
@@ -51,9 +52,10 @@ class Field:
 			self._type = next(i for i in self.__class__.mro() if issubclass(i, UnmountedType))
 
 		if sqltype := getattr(self, '_sqltype', None):
-			if sqltype is sqlalchemy.dialects.postgresql.types.BYTEA:
-				args = (sqltype(*args, length=kwargs.pop('length', None)),)
-			else: args = (sqltype(*args),)
+			if len(args) <= 1 or not isinstance(args[1], sqltype):
+				if sqltype is sqlalchemy.dialects.postgresql.types.BYTEA:
+					args = (sqltype(*args, length=kwargs.pop('length', None)),)
+				else: args = (sqltype(*args),)
 
 			kwargs.pop('type_', None)
 		elif sqltype := kwargs.pop('type_', None):
@@ -74,9 +76,27 @@ class Field:
 	def updatable(self) -> bool:
 		return (self.writable and not self.create_only)
 
+	@property
+	def filterable(self) -> bool:
+		return self.readable
+
 class ColumnField(Field, sqlalchemy.Column): pass
 
 class EnumField(ColumnField, graphene.Enum): pass
+
+
+class _BareField:
+	def __init__(self, *args, primary_key=None, nullable=None, **kwargs):
+		self.primary_key, self.nullable = primary_key, nullable
+		super().__init__(*args, **kwargs)
+
+class RelationField(Field, _BareField, sqlalchemy.orm.Relationship):
+	filterable = False
+
+	@property
+	def _type(self) -> type:
+		try: return self.mapper.class_
+		except AttributeError: return None
 
 
 # by Sdore, 2025-26

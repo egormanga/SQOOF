@@ -1,12 +1,4 @@
-from typing import Any, Iterator
-
-
-def to_camel_case(text: str) -> str:
-	return str().join((i.title() if ii == 1 else i) for ii, i in enumerate(text.split('_')))
-
-
-def keys_to_camel(d: dict[str, Any]) -> dict[str, Any]:
-	return {to_camel_case(k): v for k, v in d.items()}
+from typing import Iterator
 
 
 def allsubclasses(c: type) -> Iterator[type]:
@@ -25,5 +17,5 @@ class classproperty:
 		return self.__wrapped__(cls)
 
 
-# by Sdore, 2023-25
+# by Sdore, 2023-26
 #   www.sdore.me

@@ -15,15 +15,16 @@ import graphene.types
 import sqlalchemy.types
 
 from .field import (
-	ColumnField as _Field,
+	ColumnField as _ColumnField,
 	EnumField as Enum,
+	RelationField as _RelationField,
 )
 
 
 globals().update({
 	column_type.__name__: type(
 		column_type.__name__,
-		(_Field, graphene_type),
+		(_ColumnField, graphene_type),
 		{'_type': graphene_type, '_sqltype': column_type, '__doc__': graphene_type.__doc__},
 	)
 	for column_type, graphene_type in {
@@ -39,6 +40,13 @@ globals().update({
 		sqlalchemy.types.Uuid: graphene.types.UUID,
 	}.items()
 })
+
+
+class Relation(_RelationField, graphene.types.Dynamic):
+	with_schema = False
+
+	def type(self):
+		return graphene.types.Field(self._type.Type, required=self.required)
 
 
 # by Sdore, 2023-26

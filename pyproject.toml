@@ -1,6 +1,6 @@
 [project]
 name = 'sqoof'
-version = '0.2.1'
+version = '0.3.0'
 description = "Structured Querying in Object-Oriented Fashion"
 authors = [
 	{name="Egor Vorontsov", email='sdoregor@sdore.me'},
@@ -10,8 +10,8 @@ authors = [
 readme = 'README.md'
 requires-python = '~=3.13'
 dependencies = [
-    'graphene ~= 3.4',
-    'sqlalchemy ~= 2.0',
+	'graphene ~= 3.4',
+	'sqlalchemy ~= 2.0',
 ]
 
 [build-system]
